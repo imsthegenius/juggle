@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Canonical Info.plist for ~/Applications/Juggle.app.
+  scripts/juggle-ship.sh copies this verbatim to Contents/Info.plist on every ship
+  (SPM's own generated plist lacks the usage-description strings below).
+
+  The NS*FolderUsageDescription strings give the macOS folder-access prompt a clear,
+  app-specific reason. They are NOT what fixes the *repeated* prompting — that is the
+  stable signing identity applied by scripts/juggle-ship.sh (Apple Development identity) — but without them the
+  prompt shows only a generic system string and, if access is ever revoked, macOS can
+  silently fail to re-prompt.
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key><string>Juggle</string>
+  <key>CFBundleDisplayName</key><string>Juggle</string>
+  <key>CFBundleIdentifier</key><string>io.github.imsthegenius.juggle</string>
+  <key>CFBundleExecutable</key><string>Juggle</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>0.1.0</string>
+  <key>CFBundleVersion</key><string>1</string>
+  <key>LSMinimumSystemVersion</key><string>14.0</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSPrincipalClass</key><string>NSApplication</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
+
+  <key>NSDesktopFolderUsageDescription</key>
+  <string>Juggle opens terminal windows rooted at your projects and runs git inside them. Allow this so projects on your Desktop work.</string>
+  <key>NSDocumentsFolderUsageDescription</key>
+  <string>Juggle opens terminal windows rooted at your projects and runs git inside them. Allow this so projects in Documents work.</string>
+  <key>NSDownloadsFolderUsageDescription</key>
+  <string>If a project lives in Downloads, Juggle needs this access to open a terminal there and run git.</string>
+  <key>NSRemovableVolumesUsageDescription</key>
+  <string>If a project lives on an external drive, Juggle needs this access to open a terminal there and run git.</string>
+  <key>NSNetworkVolumesUsageDescription</key>
+  <string>If a project lives on a network drive, Juggle needs this access to open a terminal there and run git.</string>
+</dict>
+</plist>

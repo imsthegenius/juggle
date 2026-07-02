@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Hardened-runtime entitlements for the notarized release build.
+
+  Hardened runtime is REQUIRED for notarization. Juggle statically links libghostty
+  (no third-party dylibs to load) and spawns the user's shell as a separate child
+  process, so it needs no special entitlements today — an empty dict is correct.
+
+  If a future notarization log or a launch failure points at a specific capability,
+  add the matching key here (e.g. com.apple.security.cs.disable-library-validation
+  only if we ever load an unsigned plug-in). Keep this list as small as possible.
+-->
+<plist version="1.0">
+<dict>
+</dict>
+</plist>

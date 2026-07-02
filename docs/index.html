@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Juggle is a native macOS terminal cockpit for developers running multiple agents, repositories, and Git worktrees at once." />
+  <link rel="canonical" href="https://getjuggle.xyz/" />
+  <title>Juggle — a native macOS terminal cockpit</title>
+  <style>
+    :root {
+      --bg: #070808;
+      --surface: #101313;
+      --surface-2: #171b1b;
+      --line: rgba(255,255,255,.11);
+      --text: #f4f4f2;
+      --muted: rgba(244,244,242,.68);
+      --faint: rgba(244,244,242,.42);
+      --accent: #20c7ce;
+      --shadow: 0 30px 120px rgba(0,0,0,.45);
+      color-scheme: dark;
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(32,199,206,.20), transparent 34rem),
+        radial-gradient(circle at 82% 18%, rgba(255,255,255,.06), transparent 30rem),
+        linear-gradient(180deg, #050606 0%, var(--bg) 54%, #030404 100%);
+      color: var(--text);
+    }
+    a { color: inherit; }
+    .wrap { width: min(1120px, calc(100vw - 40px)); margin: 0 auto; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(7,8,8,.68);
+      border-bottom: 1px solid var(--line);
+    }
+    nav { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: -.02em; }
+    .brand img { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 8px 18px rgba(0,0,0,.35)); }
+    .links { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 14px; }
+    .links a { text-decoration: none; }
+    .links a:hover { color: var(--text); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(32,199,206,.35);
+      background: linear-gradient(180deg, rgba(32,199,206,.22), rgba(32,199,206,.12));
+      color: #eaffff;
+      text-decoration: none;
+      font-weight: 720;
+      box-shadow: 0 0 0 1px rgba(32,199,206,.08), 0 18px 60px rgba(32,199,206,.14);
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(32,199,206,.65); background: linear-gradient(180deg, rgba(32,199,206,.30), rgba(32,199,206,.16)); }
+    .btn.secondary { background: rgba(255,255,255,.055); border-color: var(--line); color: var(--text); box-shadow: none; }
+    .hero { padding: 92px 0 74px; display: grid; grid-template-columns: 1.06fr .94fr; gap: 58px; align-items: center; }
+    h1 { margin: 0; font-size: clamp(54px, 8vw, 108px); line-height: .88; letter-spacing: -.075em; max-width: 720px; }
+    .lead { margin: 28px 0 0; max-width: 610px; font-size: clamp(18px, 2.1vw, 23px); line-height: 1.35; color: var(--muted); letter-spacing: -.018em; }
+    .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+    .note { margin-top: 16px; color: var(--faint); font-size: 13px; }
+    .orb-card {
+      position: relative;
+      min-height: 520px;
+      border: 1px solid var(--line);
+      border-radius: 38px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .orb-card::before {
+      content: "";
+      position: absolute; inset: -35%;
+      background: conic-gradient(from 220deg, transparent, rgba(32,199,206,.28), transparent, rgba(255,255,255,.10), transparent);
+      animation: turn 12s linear infinite;
+      opacity: .58;
+    }
+    .orb-card::after { content: ""; position: absolute; inset: 1px; border-radius: 37px; background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.10), rgba(7,8,8,.80) 58%, rgba(7,8,8,.92)); }
+    .orb-card img { position: relative; z-index: 1; width: min(78%, 420px); filter: drop-shadow(0 38px 46px rgba(0,0,0,.45)); }
+    @keyframes turn { to { transform: rotate(360deg); } }
+    .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.035); }
+    .strip-inner { min-height: 88px; display: flex; align-items: center; justify-content: space-between; gap: 22px; color: var(--muted); font-size: 15px; }
+    .pill { display: inline-flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(0,0,0,.20); white-space: nowrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 24px rgba(32,199,206,.7); }
+    section { padding: 86px 0; }
+    .section-title { margin: 0 0 28px; font-size: clamp(34px, 4vw, 56px); letter-spacing: -.055em; line-height: .96; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { min-height: 210px; padding: 24px; border: 1px solid var(--line); border-radius: 28px; background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.032)); }
+    .card strong { display: block; font-size: 19px; letter-spacing: -.025em; margin-bottom: 12px; }
+    .card p { margin: 0; color: var(--muted); line-height: 1.52; }
+    .steps { display: grid; grid-template-columns: .78fr 1.22fr; gap: 28px; align-items: start; }
+    .download-panel { padding: 30px; border-radius: 30px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .download-panel code { display: block; margin-top: 14px; padding: 14px; border-radius: 16px; background: #050606; border: 1px solid var(--line); color: #d7f8f8; overflow-x: auto; }
+    ol { margin: 0; padding-left: 22px; color: var(--muted); line-height: 1.7; font-size: 18px; }
+    footer { padding: 42px 0 64px; border-top: 1px solid var(--line); color: var(--faint); }
+    @media (max-width: 860px) {
+      .hero, .steps { grid-template-columns: 1fr; }
+      .hero { padding-top: 54px; }
+      .orb-card { min-height: 360px; }
+      .grid { grid-template-columns: 1fr; }
+      .links a:not(.btn) { display: none; }
+      .strip-inner { align-items: flex-start; flex-direction: column; padding: 20px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .orb-card::before { animation: none; } * { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="wrap">
+      <a class="brand" href="#top" aria-label="Juggle home"><img src="assets/juggle-logo.png" alt="" />Juggle</a>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href="https://github.com/imsthegenius/juggle">GitHub</a>
+        <a class="btn" href="https://github.com/imsthegenius/juggle/releases/latest/download/Juggle-0.1.0.dmg">Download for macOS</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <div>
+        <h1>A native cockpit for all the terminals you’re juggling.</h1>
+        <p class="lead">Run multiple agents, repositories, and Git worktrees without hiding work behind tabs. Juggle keeps every terminal visible, color-coded, and connected to the PRs that need you.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/imsthegenius/juggle/releases/latest/download/Juggle-0.1.0.dmg">Download for macOS</a>
+          <a class="btn secondary" href="https://github.com/imsthegenius/juggle">View source</a>
+        </div>
+        <p class="note">macOS 14+ · Apple Silicon · GitHub CLI required for PR features</p>
+      </div>
+      <div class="orb-card" aria-hidden="true"><img src="assets/juggle-logo.png" alt="" /></div>
+    </div>
+
+    <div class="strip">
+      <div class="wrap strip-inner">
+        <span class="pill"><span class="dot"></span> Real Ghostty-powered terminals</span>
+        <span class="pill"><span class="dot"></span> Project + worktree aware</span>
+        <span class="pill"><span class="dot"></span> Fresh PR checks before merge</span>
+      </div>
+    </div>
+
+    <section id="features" class="wrap">
+      <h2 class="section-title">Stop hunting for the terminal that needs you.</h2>
+      <div class="grid">
+        <div class="card"><strong>One window per terminal</strong><p>Keep work visible as native macOS windows instead of hiding agents behind tab stacks.</p></div>
+        <div class="card"><strong>Worktree cockpit</strong><p>Open projects, create worktrees, and jump to the right terminal from the menu bar.</p></div>
+        <div class="card"><strong>PR-aware attention</strong><p>Juggle surfaces ready, blocked, draft, and behind PR states — and re-checks before merge.</p></div>
+      </div>
+    </section>
+
+    <section id="download" class="wrap steps">
+      <div>
+        <h2 class="section-title">Drag. Drop. Juggle.</h2>
+        <p class="lead">The public build ships as a signed and notarized drag-to-Applications DMG.</p>
+      </div>
+      <div class="download-panel">
+        <ol>
+          <li>Download the latest DMG.</li>
+          <li>Open it and drag Juggle into Applications.</li>
+          <li>Launch Juggle and open your first project.</li>
+          <li>Grant folder access only when macOS asks for a project location.</li>
+        </ol>
+        <code>scripts/release.sh  # signed + notarized release DMG</code>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="wrap">MIT licensed. Built in Swift on Ghostty’s terminal engine.</div></footer>
+</body>
+</html>
