@@ -11,10 +11,11 @@ release.
 3. Launch Juggle from Applications and open your first project.
 
 The DMG is Developer ID signed, notarized by Apple, and stapled, so it opens
-without a Gatekeeper warning. Verify the download with the published SHA-256:
+without a Gatekeeper warning. Verify the download with the published SHA-256
+(run it from the folder holding the downloaded file):
 
 ```bash
-shasum -a 256 -c Juggle-0.1.0.dmg.sha256
+shasum -a 256 -c Juggle.dmg.sha256
 ```
 
 ## Requirements

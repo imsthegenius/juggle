@@ -67,6 +67,9 @@ codesign -dvv "$APP" 2>&1 | grep -E "^(Authority|TeamIdentifier|Timestamp|Runtim
 # ── Build the drag-to-Applications DMG (the app is already signed above) ──────
 echo "==> building DMG"
 DMG="$DIST/Juggle-$VERSION.dmg"
+# Stable, version-independent alias so a public download link
+# (/releases/latest/download/Juggle.dmg) never breaks when VERSION changes.
+DMG_STABLE="$DIST/Juggle.dmg"
 STAGING="$(mktemp -d)"
 cp -R "$APP" "$STAGING/Juggle.app"
 ln -s /Applications "$STAGING/Applications"
@@ -82,10 +85,13 @@ codesign --force --timestamp --sign "$IDENTITY" "$DMG"
 codesign --verify --verbose=2 "$DMG"
 
 if [ "$SKIP_NOTARIZE" -eq 1 ]; then
-  shasum -a 256 "$DMG" > "$DMG.sha256"
+  cp -f "$DMG" "$DMG_STABLE"
+  ( cd "$DIST" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256" )
+  ( cd "$DIST" && shasum -a 256 "$(basename "$DMG_STABLE")" > "$(basename "$DMG_STABLE").sha256" )
   echo ""
   echo "✅ Signed DMG built → $DMG  (NOT notarized — local check only)"
   echo "   SHA-256 → $DMG.sha256"
+  echo "   Stable alias → $DMG_STABLE (+ .sha256)"
   exit 0
 fi
 
@@ -118,8 +124,12 @@ echo "==> verification"
 hdiutil verify "$DMG" >/dev/null && echo "  ✓ hdiutil verify passed"
 xcrun stapler validate "$DMG" && echo "  ✓ stapler validate passed"
 spctl --assess --type open --context context:primary-signature -vv "$DMG" 2>&1 | sed 's/^/    /'
-shasum -a 256 "$DMG" > "$DMG.sha256"
+# Publish a stable, version-independent copy too (already notarized+stapled).
+cp -f "$DMG" "$DMG_STABLE"
+( cd "$DIST" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256" )
+( cd "$DIST" && shasum -a 256 "$(basename "$DMG_STABLE")" > "$(basename "$DMG_STABLE").sha256" )
 
 echo ""
 echo "✅ Notarized + stapled → $DMG"
 echo "   SHA-256 → $DMG.sha256"
+echo "   Stable alias → $DMG_STABLE (+ .sha256)"
